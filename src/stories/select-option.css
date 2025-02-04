@@ -38,7 +38,20 @@
     padding: 4px 10px;
     width: 100%;
     display: flex;
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.select-value span {
+    margin: 0;
+    padding: 4px 5px 4px 10px;
+    border-radius: 20px;
+    background: rgb(238, 238, 238);
+    font-size: 12px;
+    line-height: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
 }
 
 .select-input {
@@ -72,6 +85,10 @@
     font-size: 13px;
 }
 
+.list-bgsearch {
+    background: #7ff4ff;
+}
+
 .list:hover {
     background: #e8f8ff;
 }
@@ -92,6 +109,10 @@
 
 .input-search--wrapper svg {
     color: gray;
+}
+
+.close-button {
+    cursor: pointer;
 }
 
 .select-input--search {

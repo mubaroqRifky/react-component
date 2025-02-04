@@ -20,7 +20,7 @@ const SelectOption = ({
     id = "value",
     optionLabel = "text",
     multiple = false,
-    outlined = false,
+    outlined = true,
     withSearch = false,
     options = [],
     ...props
@@ -28,10 +28,33 @@ const SelectOption = ({
     const [open, setOpen] = useState(Boolean);
     const [inputSearch, setInputSearch] = useState(String);
     const [resultOption, setResultOption] = useState(Array);
-    const [selected, setSelected] = useState(null);
+    const [selected, setSelected]: any = useState(null);
+
+    const removeSelectedHandler = (value: any) => {
+        const result = selected.filter((v: any) => {
+            return v[id] != value[id];
+        });
+
+        setSelected(result);
+    };
+
+    const selectMultipleHandler = (val: any) => {
+        const selectedResult = selected || [];
+        const existData = selectedResult.find((v: any) => val[id] == v[id]);
+
+        if (!existData) {
+            selectedResult.push(val);
+            setSelected(selectedResult);
+        }
+    };
 
     const selectValueHandler = (val: any) => {
-        setSelected(val);
+        if (multiple) {
+            selectMultipleHandler(val);
+        } else {
+            setSelected(val);
+        }
+
         closeHandler();
     };
 
@@ -40,9 +63,19 @@ const SelectOption = ({
 
         const regexp = new RegExp(value, "gi");
 
-        const result = options.filter((val: any) => {
-            return val[optionLabel].match(regexp);
-        });
+        const result = options
+            .filter((val: any) => {
+                return val[optionLabel].match(regexp);
+            })
+            .map((val: any) => {
+                return {
+                    ...val,
+                    [optionLabel]: val[optionLabel].replace(
+                        regexp,
+                        `<span class="list-bgsearch">${value}</span>`
+                    ),
+                };
+            });
 
         setResultOption(result);
     };
@@ -87,6 +120,12 @@ const SelectOption = ({
         setResultOption(options);
     }, []);
 
+    useEffect(() => {
+        setSelected(null);
+        setResultOption(options);
+        setInputSearch("");
+    }, [multiple]);
+
     return (
         <div {...props} className="select-container">
             {label && <span className="select-label">{label}</span>}
@@ -98,15 +137,45 @@ const SelectOption = ({
                     }`}
                     onClick={clickSelectHandler}
                 >
-                    {selected ? (
-                        <div className="select-value">
-                            {selected?.[optionLabel] || selected}
-                        </div>
-                    ) : (
+                    {!selected && (
                         <div className="select-value option-placeholder">
                             {placeholder}
                         </div>
                     )}
+
+                    {multiple
+                        ? Array.isArray(selected) && (
+                              <div className="select-value">
+                                  {selected.map((v: any) => {
+                                      return (
+                                          <span>
+                                              {v?.[optionLabel]}
+                                              <svg
+                                                  onClick={() =>
+                                                      removeSelectedHandler(v)
+                                                  }
+                                                  className="close-button"
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                  width="16"
+                                                  height="16"
+                                                  viewBox="0 0 24 24"
+                                              >
+                                                  <path
+                                                      fill="currentColor"
+                                                      d="m8.054 16.673l-.727-.727L11.273 12L7.327 8.079l.727-.727L12 11.298l3.921-3.946l.727.727L12.702 12l3.946 3.946l-.727.727L12 12.727z"
+                                                  />
+                                              </svg>
+                                          </span>
+                                      );
+                                  })}
+                              </div>
+                          )
+                        : selected &&
+                          !Array.isArray(selected) && (
+                              <div className="select-value">
+                                  {selected?.[optionLabel] || selected}
+                              </div>
+                          )}
 
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -152,6 +221,7 @@ const SelectOption = ({
                                 />
                                 {inputSearch && (
                                     <svg
+                                        className="close-button"
                                         onClick={clearInputSearch}
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="15"
@@ -174,9 +244,10 @@ const SelectOption = ({
                                         key={i}
                                         className="list"
                                         onClick={() => selectValueHandler(v)}
-                                    >
-                                        {v[optionLabel] || "-"}
-                                    </div>
+                                        dangerouslySetInnerHTML={{
+                                            __html: v[optionLabel] || "-",
+                                        }}
+                                    ></div>
                                 );
                             })}
 

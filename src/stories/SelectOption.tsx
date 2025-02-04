@@ -70,10 +70,6 @@ const SelectOption = ({
             .map((val: any) => {
                 return {
                     ...val,
-                    [optionLabel]: val[optionLabel].replace(
-                        regexp,
-                        `<span class="list-bgsearch">${value}</span>`
-                    ),
                 };
             });
 
